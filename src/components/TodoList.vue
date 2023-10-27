@@ -2,6 +2,8 @@
 import { reactive, onMounted } from 'vue';
 
 import ListItem from './ListItem.vue';  
+import FilterBy from './FilterBy.vue';  
+
 
 const statuses = ['completed', 'unfinished'];
 
@@ -45,19 +47,23 @@ const editTodo = (todo, updatedTitle) => {
   todo.title = updatedTitle;
 };
 
-const toggleStatusFilter = ({ target: { dataset: { status } } }) => {
+const toggleStatusFilter = ({ target: { dataset: { item } } }) => {
   const { filteredBy } = state;
-  filteredBy.status = filteredBy.status.includes(status) 
-      ? filteredBy.status.filter((st) => st != status)
-      : [...filteredBy.status, status];
+
+  filteredBy.status = filteredBy.status.includes(item) 
+      ? filteredBy.status.filter((st) => st !== item)
+      : [...filteredBy.status, item];
 };
 
-const toggleUserIdFilter = ({ target: { dataset: { userId } } }) => {
+const toggleUserIdFilter = ({ target: { dataset: { item } } }) => {
   const { filteredBy } = state;
-  filteredBy.userId = filteredBy.userId.includes(+userId) 
-      ? filteredBy.userId.filter((st) => st !== +userId)
-      : [...filteredBy.userId, +userId];
+  filteredBy.userId = filteredBy.userId.includes(+item) 
+      ? filteredBy.userId.filter((st) => st !== +item)
+      : [...filteredBy.userId, +item];
 };
+
+const checkUserActive = (userId) => state.filteredBy.userId.includes(+userId);
+const checkStatusActive = (status) =>  state.filteredBy.status.includes(status);
 
 </script>
 
@@ -65,31 +71,21 @@ const toggleUserIdFilter = ({ target: { dataset: { userId } } }) => {
   <div class="wrapper">
     <main>
       <div class="controls">
-        <section>
-          <h2>UserId</h2>
-          <div class="buttons">
-            <button 
-              v-for="userId in state.userIds"
-              :key="userId"
-              :data-user-id="userId"
-              :class="[state.filteredBy.userId.includes(+userId) ? 'active' : '']"
-              @click="toggleUserIdFilter"
-            >{{ userId }}</button>
-          </div>
-        </section>
 
-        <section>
-          <h2>Status</h2> 
-          <div class="buttons">
-            <button 
-              v-for="status in statuses"
-              :key="status"
-              :data-status="status"
-              :class="[state.filteredBy.status.includes(status) ? 'active' : '']"
-              @click="toggleStatusFilter"
-            >{{ status }}</button>
-          </div>
-        </section>        
+        <FilterBy 
+          by="UserId"
+          :iterable="state.userIds"
+          :toggleFunction="toggleUserIdFilter"
+          :checkActive="checkUserActive"
+        />
+
+        <FilterBy 
+          by="Status"
+          :iterable="statuses"
+          :toggleFunction="toggleStatusFilter"
+          :checkActive="checkStatusActive"
+        />
+
       </div>
   
       <ul>
@@ -117,31 +113,10 @@ const toggleUserIdFilter = ({ target: { dataset: { userId } } }) => {
 .wrapper {
   display: flex; justify-content: center;
 }
+
 ul {
   display: flex; flex-direction: column;
   gap: 10px;
-}
-
-button {
-  padding: 5px 10px;
-  border: 1px solid hsla(160, 100%, 37%, 1);
-  color: hsla(160, 100%, 37%, 1);
-  outline: none;
-  background-color: transparent;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: all .25s;
-}
-button:hover {
-  outline: 1px solid hsla(160, 100%, 37%, 1);
-}
-button.active {
-  background-color: hsla(160, 100%, 37%, 1);
-  color: white;
-}
-.buttons {
-  display: flex;
-  gap: 1rem;
 }
 
 </style>
